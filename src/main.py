@@ -3,27 +3,10 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.openapi.docs import get_swagger_ui_html
-import uuid
 
-# from src.redis import Redis
-# from sqlalchemy.orm import Session
-
-# from src.parcels.schemas import (
-#     ParcelCreate,
-#     Parcel,
-#     ParcelType,
-#     ParcelUpdate,
-#     ParcelFilter,
-#     ParcelList,
-#     ParcelResponse,
-#     Currency,
-#     CurrencyResponse,
-# )
-
-# from src.utils import get_db, get_redis, calculate_shipping_cost, get_exchange_rate
-# from src.tasks import schedule_shipping_cost_calculation
-# from fastapi import APIRouter
 from src.parcels.router import router as parcels_router
+from src.utils import generate_uuid
+from src import strings
 
 # from src.core.events import create_start_app_handler
 
@@ -48,8 +31,8 @@ def get_application() -> FastAPI:
     @application.middleware("http")
     async def add_cookie_middleware(request: Request, call_next):
         response: Response = await call_next(request)
-        if request.cookies.get("sessionKey") is None:
-            response.set_cookie(key="sessionKey", value=str(uuid.uuid4()), httponly=True)
+        if request.cookies.get(strings.SESSION_KEY) is None:
+            response.set_cookie(key=strings.SESSION_KEY, value=generate_uuid(), httponly=True)
         return response
 
     # application.add_event_handler(

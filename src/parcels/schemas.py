@@ -97,12 +97,3 @@ class ParcelIdResponse(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-class Currency(BaseModel):
-    id: int
-    rate: float
-
-
-class CurrencyResponse(BaseModel):
-    rate: float

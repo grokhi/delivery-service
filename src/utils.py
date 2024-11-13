@@ -4,7 +4,7 @@ import os
 import json
 from redis import Redis
 import uuid
-from .parcels.schemas import Parcel, ParcelType, Currency
+from .parcels.schemas import Parcel, ParcelType
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from src.parcels import models

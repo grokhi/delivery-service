@@ -18,8 +18,6 @@ from src.parcels.schemas import (
     ParcelFilter,
     ParcelListResponse,
     ParcelResponse,
-    Currency,
-    CurrencyResponse,
     ParcelTypeResponse,
 )
 from src.utils import get_db, get_redis, calculate_shipping_cost, get_exchange_rate
@@ -32,10 +30,10 @@ from typing import *
 from fastapi import FastAPI, Response
 from sqlalchemy.exc import NoResultFound
 from src.parcels import models
-from src import utils
+from src import utils, strings
 
 
-@router.post("/create", response_model=ParcelResponse, tags=["Parcels"])
+@router.post("/create", response_model=ParcelResponse, tags=["parcels"])
 async def create_parcel(
     parcel_entry: ParcelCreate,
     request: Request,
@@ -43,7 +41,7 @@ async def create_parcel(
 ):
     """Registers a new parcel."""
     try:
-        user_id = request.cookies.get("sessionKey", utils.generate_uuid())
+        user_id = request.cookies.get(strings.SESSION_KEY, utils.generate_uuid())
         parcel_id = f"{user_id}__{utils.generate_uuid()}"
 
         parcel_type = utils.get_parcel_type(parcel_entry.type, db)
@@ -70,14 +68,14 @@ async def create_parcel(
         raise HTTPException(status_code=400, detail=f"Error registering parcel: {e}")
 
 
-@router.get("/types", response_model=list[ParcelTypeResponse], tags=["Parcels"])
+@router.get("/types", response_model=list[ParcelTypeResponse], tags=["parcels"])
 async def get_parcel_types(db: Session = Depends(get_db)):
     """Retrieves all parcel types."""
     parcel_types = db.query(models.ParcelType).all()
     return parcel_types
 
 
-@router.get("/list", response_model=ParcelListResponse, tags=["Parcels"])
+@router.get("/list", response_model=ParcelListResponse, tags=["parcels"])
 async def get_parcels_list(
     request: Request,
     parcel_filter: ParcelFilter = Depends(),
@@ -85,7 +83,7 @@ async def get_parcels_list(
     # redis: Redis = Depends(get_redis),
 ):
     """Retrieves a list of parcels with pagination and filtering."""
-    user_id = request.cookies.get("sessionKey", utils.generate_uuid())
+    user_id = request.cookies.get(strings.SESSION_KEY, utils.generate_uuid())
     parcels = db.query(models.Parcel).filter(models.Parcel.user_id == user_id)
     if parcel_filter.type:
         parcels = parcels.filter(models.Parcel.type == parcel_filter.type)
@@ -110,7 +108,7 @@ async def get_parcels_list(
     )
 
 
-@router.get("/{parcel_id}", response_model=ParcelIdResponse, tags=["Parcels"])
+@router.get("/{parcel_id}", response_model=ParcelIdResponse, tags=["parcels"])
 async def get_parcel(
     parcel_id: str,
     db: Session = Depends(get_db),  # , redis: Redis = Depends(get_redis)
