@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from src.redis import Redis
 from .utils import calculate_shipping_cost, get_exchange_rate
-from .database import engine, SessionLocal
 from .parcels.schemas import Parcel
 
 import asyncio
@@ -21,7 +20,7 @@ async def calculate_shipping_costs(redis: Redis):
     db = SessionLocal()
     try:
         exchange_rate = get_exchange_rate(redis)
-        unprocessed_parcels = db.query(Parcel).filter(Parcel.shipping_cost.is_(None)).all()
+        unprocessed_parcels = db.query(Parcel).filter(Parcel.shipping_cost_rub.is_(None)).all()
         for parcel in unprocessed_parcels:
             shipping_cost = calculate_shipping_cost(parcel, exchange_rate)
             parcel.shipping_cost = shipping_cost

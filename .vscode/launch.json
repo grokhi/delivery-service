@@ -18,6 +18,7 @@
             ],
             "jinja": true,
             "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}:${PYTHONPATH}",
                 "LOG_LEVEL": "DEBUG"

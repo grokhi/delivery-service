@@ -3,12 +3,17 @@ from sqlalchemy import create_engine
 import os
 import json
 from redis import Redis
-
+import uuid
 from .parcels.schemas import Parcel, ParcelType, Currency
+from sqlalchemy.orm import Session
+from fastapi import HTTPException
+from src.parcels import models
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./delivery.db")
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL", "mysql+mysqlconnector://root:@localhost/database"
+)
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -44,3 +49,16 @@ def get_exchange_rate(redis: Redis):
             exchange_rate = exchange_rate_data["RUB"]
             redis.set("exchange_rate", exchange_rate)
         return exchange_rate
+
+
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
+
+
+def get_parcel_type(name: str, db: Session) -> models.ParcelType:
+    type_record = db.query(models.ParcelType).filter_by(name=name).first()
+    if not type_record:
+        raise HTTPException(
+            status_code=400, detail=f"Parcel type '{name}' not found in the database."
+        )
+    return type_record

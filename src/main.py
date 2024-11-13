@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.openapi.docs import get_swagger_ui_html
+import uuid
 
 # from src.redis import Redis
 # from sqlalchemy.orm import Session
 
-# from src.database import engine, SessionLocal, Base
 # from src.parcels.schemas import (
 #     ParcelCreate,
 #     Parcel,
@@ -24,6 +24,8 @@ from fastapi.openapi.docs import get_swagger_ui_html
 # from src.tasks import schedule_shipping_cost_calculation
 # from fastapi import APIRouter
 from src.parcels.router import router as parcels_router
+
+# from src.core.events import create_start_app_handler
 
 
 def get_application() -> FastAPI:
@@ -43,9 +45,19 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @application.middleware("http")
+    async def add_cookie_middleware(request: Request, call_next):
+        response: Response = await call_next(request)
+        if request.cookies.get("sessionKey") is None:
+            response.set_cookie(key="sessionKey", value=str(uuid.uuid4()), httponly=True)
+        return response
+
     # application.add_event_handler(
     #     "startup",
-    #     create_start_app_handler(application, settings),
+    #     create_start_app_handler(
+    #         application,
+    #         # settings,
+    #     ),
     # )
     # application.add_event_handler(
     #     "shutdown",

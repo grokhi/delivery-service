@@ -14,11 +14,5 @@ CREATE TABLE parcels (
     FOREIGN KEY (type_id) REFERENCES parcel_types(id)
 );
 
-CREATE TABLE currency (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    rate FLOAT NOT NULL
-);
-
 -- Insert initial data
 INSERT INTO parcel_types (name) VALUES ('Clothing'), ('Electronics'), ('Miscellaneous');
-INSERT INTO currency (rate) VALUES (75.5); -- Example exchange rate
