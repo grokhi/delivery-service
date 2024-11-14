@@ -1,13 +1,23 @@
+from __future__ import annotations
+
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 import os
 import json
 from redis import Redis
 import uuid
-from .parcels.schemas import Parcel, ParcelType
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from src.parcels import models
+import httpx
+import asyncio
+import aioredis
+from typing import Any, Dict, TYPE_CHECKING
+import json
+
+if TYPE_CHECKING:
+    from .parcels.schemas import Parcel, ParcelType, ParcelCreate
+
 
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL", "mysql+mysqlconnector://root:@localhost/database"
@@ -26,15 +36,9 @@ def get_db():
         db.close()
 
 
-def get_redis():
-    """Gets a Redis connection."""
-    redis = Redis(host="redis", port=6379)
-    return redis
-
-
-def calculate_shipping_cost(parcel: Parcel, exchange_rate: float):
+def calculate_shipping_cost(parcel: ParcelCreate, exchange_rate: float):
     """Calculates the shipping cost for a parcel."""
-    return (parcel.weight * 0.5 + parcel.cost * 0.01) * exchange_rate
+    return (parcel.weight * 0.5 + parcel.cost_usd * 0.01) * exchange_rate
 
 
 def get_exchange_rate(redis: Redis):

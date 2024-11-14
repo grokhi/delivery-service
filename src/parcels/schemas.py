@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, validator, Field
-from typing import Optional, List
+from typing import Optional, List, Literal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from fastapi import HTTPException
+from src import strings
+from src.parcels import models
+from src.utils import get_db
 
 
-class ParcelType(BaseModel):
-    id: int
-    name: str
+def get_allowed_types():
+    db = next(get_db())
+    return [name[0] for name in db.query(models.ParcelType.name).all()]
 
 
 class ParcelCreate(BaseModel):
@@ -24,28 +27,16 @@ class ParcelCreate(BaseModel):
             raise ValueError("Weight must be a positive number")
         return value
 
+    @validator("type")
+    def category_must_be_allowed(cls, value):
+        allowed = get_allowed_types()
+        if value not in allowed:
+            raise ValueError(f"Type {value!r} is not allowed. Allowed types: {allowed}")
+        return value
+
     @validator("cost_usd")
     def cost_must_be_positive(cls, value):
         if value <= 0:
-            raise ValueError("Cost must be a positive number")
-        return value
-
-
-class ParcelUpdate(BaseModel):
-    name: Optional[str] = None
-    weight: Optional[float] = None
-    type_id: Optional[int] = None
-    cost: Optional[float] = None
-
-    @validator("weight", always=True)
-    def weight_must_be_positive(cls, value):
-        if value is not None and value <= 0:
-            raise ValueError("Weight must be a positive number")
-        return value
-
-    @validator("cost", always=True)
-    def cost_must_be_positive(cls, value):
-        if value is not None and value <= 0:
             raise ValueError("Cost must be a positive number")
         return value
 

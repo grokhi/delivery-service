@@ -8,19 +8,17 @@ from fastapi.openapi.docs import get_swagger_ui_html
 
 # from src.redis import Redis
 from sqlalchemy.orm import Session
-
+import json
 from src.parcels.schemas import (
     ParcelCreate,
     Parcel,
-    ParcelType,
     ParcelIdResponse,
-    ParcelUpdate,
     ParcelFilter,
     ParcelListResponse,
     ParcelResponse,
     ParcelTypeResponse,
 )
-from src.utils import get_db, get_redis, calculate_shipping_cost, get_exchange_rate
+from src.utils import get_db, calculate_shipping_cost, get_exchange_rate
 import uuid
 
 router = APIRouter()
@@ -31,6 +29,8 @@ from fastapi import FastAPI, Response
 from sqlalchemy.exc import NoResultFound
 from src.parcels import models
 from src import utils, strings
+from src.tasks import get_redis
+from aioredis import Redis
 
 
 @router.post("/create", response_model=ParcelResponse, tags=["parcels"])
@@ -54,7 +54,6 @@ async def create_parcel(
             type_id=parcel_type.id,
             type=parcel_type.name,
             cost_usd=parcel_entry.cost_usd,
-            shipping_cost_rub=1.0,
         )
         db.add(new_parcel)
         db.commit()
@@ -80,7 +79,6 @@ async def get_parcels_list(
     request: Request,
     parcel_filter: ParcelFilter = Depends(),
     db: Session = Depends(get_db),
-    # redis: Redis = Depends(get_redis),
 ):
     """Retrieves a list of parcels with pagination and filtering."""
     user_id = request.cookies.get(strings.SESSION_KEY, utils.generate_uuid())

@@ -17,16 +17,15 @@ class ParcelType(Base):
 
 
 class Parcel(Base):
-    __tablename__ = "parcels"  # Table name in the database
+    __tablename__ = "parcels"
 
     id = Column(String(255), primary_key=True, index=True)
     user_id = Column(String(255))
     name = Column(String(255))
     weight = Column(Float)
-    type_id = Column(Integer, ForeignKey("parcel_types.id"))  # Assuming there is a ParcelType model
-    type = Column(String(255))  # Assuming there is a ParcelType model
+    type_id = Column(Integer, ForeignKey("parcel_types.id"))
+    type = Column(String(255))
     cost_usd = Column(Float)
     shipping_cost_rub = Column(Float)
 
-    # Define relationship to ParcelType (optional if you want to access the type directly)
     parcel_type = relationship("ParcelType", back_populates="parcels")
