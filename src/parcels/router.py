@@ -74,6 +74,12 @@ async def get_parcel_types(db: Session = Depends(get_db)):
     return parcel_types
 
 
+def _format_parcel_response(parcel):
+    parcel_data = Parcel.from_orm(parcel)
+    parcel_data.shipping_cost_rub = parcel_data.shipping_cost_rub_display
+    return parcel_data
+
+
 @router.get("/list", response_model=ParcelListResponse, tags=["parcels"])
 async def get_parcels_list(
     request: Request,
@@ -83,26 +89,19 @@ async def get_parcels_list(
     """Retrieves a list of parcels with pagination and filtering."""
     user_id = request.cookies.get(strings.SESSION_KEY, utils.generate_uuid())
     parcels = db.query(models.Parcel).filter(models.Parcel.user_id == user_id)
-    if parcel_filter.type:
+
+    if parcel_filter.type is not None:
         parcels = parcels.filter(models.Parcel.type == parcel_filter.type)
 
-    # if parcel_filter.shipping_cost_calculated:
-    #     parcels = parcels.filter(
-    #         models.Parcel.shipping_cost_rub != None
-    #     )  # Check for non-null values
+    if parcel_filter.shipping_cost_calculated is True:
+        parcels = parcels.filter(models.Parcel.shipping_cost_rub != None)
+    elif parcel_filter.shipping_cost_calculated is False:
+        parcels = parcels.filter(models.Parcel.shipping_cost_rub == None)
 
     total_count = parcels.count()
     parcels = parcels.limit(parcel_filter.limit).offset(parcel_filter.offset).all()
-
-    # for parcel in parcels:
-    #     shipping_cost = redis.hget(f"parcel:{parcel.id}:shipping_cost", encoding="utf-8")
-    #     if shipping_cost:
-    #         parcel.shipping_cost = float(shipping_cost)
-    #     else:
-    #         parcel.shipping_cost = "Not calculated"
-
     return ParcelListResponse(
-        total_count=total_count, parcels=[Parcel.from_orm(parcel) for parcel in parcels]
+        total_count=total_count, parcels=[_format_parcel_response(p) for p in parcels]
     )
 
 
@@ -115,11 +114,8 @@ async def get_parcel(
     parcel = db.query(models.Parcel).filter(models.Parcel.id == parcel_id).first()
     if not parcel:
         raise HTTPException(status_code=404, detail="Parcel not found")
-    # shipping_cost = redis.hget(f"parcel:{parcel.id}:shipping_cost", encoding="utf-8")
-    # if shipping_cost:
-    #     parcel.shipping_cost = float(shipping_cost)
-    # else:
-    #     parcel.shipping_cost = "Not calculated"
+
     return ParcelIdResponse(
-        message=f"Parcel with ID={parcel_id!r} was successfully found.", **parcel.__dict__
+        message=f"Parcel with ID={parcel_id!r} was successfully found.",
+        **_format_parcel_response(parcel).__dict__,
     )

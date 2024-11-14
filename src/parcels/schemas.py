@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, validator, Field
-from typing import Optional, List, Literal
+from typing import Optional, List, Literal, Union
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from fastapi import HTTPException
@@ -46,15 +46,23 @@ class Parcel(ParcelCreate):
     user_id: str
     type_id: int
     type: str
-    shipping_cost_rub: Optional[float] = None
+    shipping_cost_rub: Optional[Union[float, str]] = None
+
+    @property
+    def shipping_cost_rub_display(self):
+        return (
+            self.shipping_cost_rub if self.shipping_cost_rub is not None else "Not calculated yet."
+        )
 
     class Config:
         orm_mode = True
 
 
 class ParcelFilter(BaseModel):
-    type: Optional[str] = Field(default="other")
-    shipping_cost_calculated: Optional[bool] = None
+    type: Optional[str] = Field(default="other", description="Filter by specific type.")
+    shipping_cost_calculated: Optional[bool] = Field(
+        default=None, description="Filter by shipping cost availability."
+    )
     limit: int = 10
     offset: int = 0
 
@@ -84,7 +92,7 @@ class ParcelIdResponse(BaseModel):
     weight: float
     type: str
     cost_usd: float
-    shipping_cost_rub: float
+    shipping_cost_rub: Union[float, str]
 
     class Config:
         orm_mode = True
