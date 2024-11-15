@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, field_validator, Field
 from typing import Optional, List, Literal, Union
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -11,25 +11,21 @@ from src.db.base import get_db
 from src.core.config import settings
 
 
-# async def get_allowed_types():
-#     # db = next(get_db())
-#     async for db in get_db():
-#         return [name[0] for name in db.query(parcels.ParcelType.name).all()]
-
-
 class ParcelCreate(BaseModel):
     name: str = Field(default="some_parcel")
     weight: float = Field(default=1.0)
     type: str = Field(default=settings.PARCEL_TYPES[0])
     cost_usd: float = Field(default=1.0)
 
-    @validator("weight")
+    @field_validator("weight")
+    @classmethod
     def weight_must_be_positive(cls, value):
         if value <= 0:
             raise ValueError("Weight must be a positive number")
         return value
 
-    @validator("type")
+    @field_validator("type")
+    @classmethod
     def category_must_be_allowed(cls, value):
         if value not in settings.PARCEL_TYPES:
             raise ValueError(
@@ -37,7 +33,8 @@ class ParcelCreate(BaseModel):
             )
         return value
 
-    @validator("cost_usd")
+    @field_validator("cost_usd")
+    @classmethod
     def cost_must_be_positive(cls, value):
         if value <= 0:
             raise ValueError("Cost must be a positive number")
@@ -45,17 +42,11 @@ class ParcelCreate(BaseModel):
 
 
 class Parcel(ParcelCreate):
-    id: str
+    id: int
     user_id: str
     type_id: int
     type: str
     shipping_cost_rub: Optional[Union[float, str]] = None
-
-    @property
-    def shipping_cost_rub_display(self):
-        return (
-            self.shipping_cost_rub if self.shipping_cost_rub is not None else "Not calculated yet."
-        )
 
     class Config:
         # orm_mode = True
@@ -63,7 +54,7 @@ class Parcel(ParcelCreate):
 
 
 class ParcelFilter(BaseModel):
-    type: Optional[str] = settings.PARCEL_TYPES[0]
+    type: Optional[str] = None
     shipping_cost_calculated: bool = True
     limit: int = 10
     offset: int = 0
@@ -80,7 +71,7 @@ class ParcelListResponse(BaseModel):
 
 class ParcelCreateResponse(BaseModel):
     message: str
-    parcel_id: Optional[str] = None
+    parcel_id: Optional[int] = None
 
 
 class ParcelTypesResponse(BaseModel):

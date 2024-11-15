@@ -27,20 +27,13 @@ from src.utils.utils import (
     get_parcel_type,
 )
 from src.db.base import get_db
-import uuid
 from src.db.models.parcels import Parcel, ParcelType
 
 router = APIRouter()
-from fastapi import Cookie
-from typing import *
+from typing import List
 
-from fastapi import FastAPI, Response
-from sqlalchemy.exc import NoResultFound
 
-from src import utils
-from src.core.cache import get_redis
 from src.core.config import settings
-from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -54,12 +47,11 @@ async def create_parcel(
     """Registers a new parcel."""
     try:
         user_id = request.cookies.get(settings.SESSION_KEY, generate_uuid())
-        parcel_id = f"{user_id}__{generate_uuid()}"
+        # parcel_id = f"{user_id}__{generate_uuid()}"
 
         parcel_type = await get_parcel_type(parcel_entry.type, db)
 
         new_parcel = Parcel(
-            id=parcel_id,
             user_id=user_id,
             name=parcel_entry.name,
             weight=parcel_entry.weight,
@@ -88,12 +80,6 @@ async def get_parcel_types(
     return result.scalars().all()
 
 
-# def _format_parcel_response(parcel):
-#     parcel_data = Parcel.from_orm(parcel)
-#     parcel_data.shipping_cost_rub = parcel_data.shipping_cost_rub_display
-#     return parcel_data
-
-
 @router.get("/list", response_model=ParcelListResponse, tags=["parcels"])
 async def get_parcels_list(
     request: Request,
@@ -109,26 +95,41 @@ async def get_parcels_list(
         query = query.filter(Parcel.type == parcel_filter.type)
 
     if parcel_filter.shipping_cost_calculated is not None:
-        query = query.filter(Parcel.shipping_cost_rub.is_(parcel_filter.shipping_cost_calculated))
+        query = query.filter(
+            Parcel.shipping_cost_rub.isnot(None)
+            if parcel_filter.shipping_cost_calculated
+            else Parcel.shipping_cost_rub.is_(None)
+        )
 
-    total_count = await db.execute(select(func.count()).select_from(query.subquery()))
-    query = query.offset(parcel_filter.offset).limit(parcel_filter.limit)
-    parcels = (await db.execute(query)).scalars().all()
+    count_query = select(func.count()).select_from(query.subquery())
+    total_count_result = await db.execute(count_query)
+    total_count = total_count_result.scalar()
 
-    return ParcelListResponse(total_count=total_count, parcels=parcels)
+    paginated_query = query.offset(parcel_filter.offset).limit(parcel_filter.limit)
+    parcels: List[Parcel] = (await db.execute(paginated_query)).scalars().all()
+
+    for parcel in parcels:
+        parcel.shipping_cost_rub = parcel.shipping_cost_rub_display
+
+    return ParcelListResponse(
+        total_count=total_count,
+        parcels=parcels,
+    )
 
 
 @router.get("/{parcel_id}", response_model=ParcelIdResponse, tags=["parcels"])
 async def get_parcel(
-    parcel_id: str,
-    db: AsyncSession = Depends(get_db),  # , redis: Redis = Depends(get_redis)
+    parcel_id: int,
+    db: AsyncSession = Depends(get_db),
 ):
     """Retrieves data for a specific parcel."""
     result = await db.execute(select(Parcel).filter(Parcel.id == parcel_id))
-    parcel = result.scalar_one_or_none()
+    parcel: Parcel = result.scalar_one_or_none()
 
     if not parcel:
         raise HTTPException(status_code=404, detail="Parcel not found")
+
+    parcel.shipping_cost_rub = parcel.shipping_cost_rub_display
 
     return ParcelIdResponse(
         message=f"Parcel with ID={parcel_id!r} was successfully found.",
