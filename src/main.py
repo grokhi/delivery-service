@@ -4,9 +4,11 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+from starlette.responses import JSONResponse
 
 from src.api.routes import debug, parcels
+from src.core.config import settings
 from src.core.events import startup_event
 from src.resources import strings
 from src.utils import utils
@@ -39,13 +41,21 @@ def get_application() -> FastAPI:
     @application.middleware("http")
     async def add_cookie_middleware(request: Request, call_next):
         response: Response = await call_next(request)
-        if request.cookies.get(strings.SESSION_KEY) is None:
-            response.set_cookie(key=strings.SESSION_KEY, value=utils.generate_uuid(), httponly=True)
+        if request.cookies.get(settings.SESSION_KEY) is None:
+            response.set_cookie(
+                key=settings.SESSION_KEY, value=utils.generate_uuid(), httponly=True
+            )
         return response
 
-    # application.add_event_handler(
-    #     "startup", lambda: asyncio.create_task(tasks.schedule_currency_update())
-    # )
+    # @application.exception_handler(ValidationError)
+    # async def validation_exception_handler(request: Request, exc: ValidationError):
+    #     return JSONResponse(
+    #         status_code=422,
+    #         content={
+    #             "detail": "Validation error occurred.",
+    #             "errors": exc.errors(),  # List of specific validation issues
+    #         },
+    #     )
 
     application.include_router(parcels.router, tags=["parcels"], prefix="/api/parcels")
     application.include_router(debug.router, tags=["debug"], prefix="/debug/events")
@@ -54,65 +64,3 @@ def get_application() -> FastAPI:
 
 
 app = get_application()
-
-# settings = get_app_settings()
-# settings.configure_logging()
-# application = FastAPI(**settings.fastapi_kwargs)
-# app = FastAPI()
-
-# Base.metadata.create_all(bind=engine)
-
-
-# @app.on_event("startup")
-# async def startup_event():
-#     """Starts Redis and schedules the shipping cost calculation task."""
-#     redis = get_redis()
-#     await schedule_shipping_cost_calculation(redis)
-
-
-# @app.get("/health", tags=["Health Check"])
-# async def health_check():
-#     """Health check endpoint."""
-#     return {"status": "ok"}
-
-
-# @app.post("/currency", response_model=CurrencyResponse, tags=["Currency"])
-# async def get_exchange_rate(db: Session = Depends(get_db)):
-#     """Retrieves the dollar to ruble exchange rate."""
-#     currency = db.query(Currency).first()
-#     if not currency:
-#         raise HTTPException(status_code=404, detail="Currency not found")
-#     return {"rate": currency.rate}
-
-
-# def custom_openapi():
-#     """Custom OpenAPI schema generation."""
-#     if app.openapi_schema:
-#         return app.openapi_schema
-#     openapi_schema = get_openapi(
-#         title="International Delivery Service",
-#         version="1.0.0",
-#         description="API for managing parcels and calculating shipping costs",
-#         routes=app.routes,
-#     )
-#     app.openapi_schema = openapi_schema
-#     return app.openapi_schema
-
-
-# app.openapi = custom_openapi
-
-
-# application.add_event_handler(
-#     "startup",
-#     create_start_app_handler(
-#         application,
-#         # settings,
-#     ),
-# )
-# application.add_event_handler(
-#     "shutdown",
-#     create_stop_app_handler(application),
-# )
-
-# application.add_exception_handler(HTTPException, http_error_handler)
-# application.add_exception_handler(RequestValidationError, http422_error_handler)

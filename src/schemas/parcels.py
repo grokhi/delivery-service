@@ -1,5 +1,6 @@
-from pydantic import BaseModel, field_validator, Field
-from typing import Optional, List, Literal, Union
+from typing import List, Literal, Optional, Union
+
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from src.core.config import settings
 
@@ -50,6 +51,15 @@ class ParcelFilter(BaseModel):
     shipping_cost_calculated: bool = True
     limit: int = 10
     offset: int = 0
+
+    @field_validator("type")
+    @classmethod
+    def category_must_be_allowed(cls, value):
+        if value not in settings.PARCEL_TYPES:
+            raise ValueError(
+                f"Type {value!r} is not allowed. Allowed types: {settings.PARCEL_TYPES}"
+            )
+        return value
 
 
 class ParcelListResponse(BaseModel):

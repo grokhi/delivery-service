@@ -1,10 +1,27 @@
-from loguru import logger
 import sys
+from functools import wraps
+
+from loguru import logger as base_logger
+
+from src.core.config import settings
 
 
 def setup_logging():
-    logger.remove()
-    logger.add(sys.stdout, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
-    logger.add("logs/app.log", rotation="500 MB", retention="10 days", level="DEBUG")
+    base_logger.remove()
+    base_logger.add(
+        sys.stdout,
+        format="<green>{level}:</green> <cyan>{time:YYYY-MM-DD HH:mm:ss}</cyan> - <level>{message}</level> <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>",
+        level=settings.LOG_LEVEL,
+    )
+    base_logger.add(
+        "logs/app.log",
+        rotation="500 MB",
+        retention="10 days",
+        level="DEBUG",
+        backtrace=True,
+        diagnose=True,
+    )
+    return base_logger
 
-    return logger
+
+logger = setup_logging()

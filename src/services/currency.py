@@ -5,20 +5,22 @@ import httpx
 from aioredis import Redis
 
 from src.core.config import settings
+from src.core.logger import logger
+from src.resources import strings
 
 
 async def fetch_currency_data(redis: Redis):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(settings.CURRENCY_API_URL)
-        if response.status_code == 200:
-            currency_data = response.json()
-            try:
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(settings.CURRENCY_API_URL)
+            if response.status_code == 200:
+                currency_data = response.json()
                 currency_usd = currency_data["Valute"]["USD"]
-            except KeyError:
-                print("URL is broken")
-                return
-            await redis.set("currency_usd", json.dumps(currency_usd))
+                await redis.set("currency_usd", json.dumps(currency_usd))
+                logger.info(strings.LOG_CURRENCY_UPDATE)
+            else:
+                logger.error(strings.ERR_CURRENCY_FETCH.format(status_code=response.status_code))
 
-            print("Currency data updated in Redis")
-        else:
-            print(f"Failed to fetch currency data: {response.status_code}")
+    except Exception as e:
+        logger.error(strings.ERR_CURRENCY_PARSE.format(error=str(e)))
+        raise

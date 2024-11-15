@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from typing import List
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -12,6 +13,7 @@ class Settings(BaseSettings):
     DEBUG: bool
     PARCEL_TYPES: List[str]
     SESSION_KEY: str
+    LOG_LEVEL: str
 
     class Config:
         env_file = ".env"
