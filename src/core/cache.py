@@ -1,7 +1,6 @@
 from typing import Any, Dict, List
 
 import aioredis
-from redis import asyncio as aioredis
 
 from src.core.config import settings
 
