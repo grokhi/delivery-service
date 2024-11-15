@@ -15,6 +15,32 @@ async def schedule_currency_update():
             await asyncio.sleep(settings.UPDATE_INTERVAL)
 
 
+async def run_debug_tasks(task_name: str = "all"):
+    """
+    Run specific tasks manually for debugging purposes.
+
+    Args:
+        task_name (str): Name of the task to run ("currency", "shipping", or "all")
+    """
+    # logger.info(f"Running debug task: {task_name}")
+
+    try:
+        if task_name in ["currency", "all"]:
+            # logger.debug("Running currency fetch task")
+            await fetch_currency_data(redis)
+
+        if task_name in ["shipping", "all"]:
+            # logger.debug("Running shipping cost calculation task")
+            async for db in get_db():
+                await handle_shipping_cost(db, redis)
+
+        # logger.info("Debug tasks completed successfully")
+
+    except Exception as e:
+        # logger.error(f"Error during debug task execution: {e}")
+        raise
+
+
 async def startup_event():
     try:
         asyncio.create_task(schedule_currency_update())

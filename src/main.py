@@ -1,4 +1,3 @@
-import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
@@ -7,8 +6,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 
-from src.api.routes.parcels import router as parcels_router
-from src.core import events
+from src.api.routes import debug, parcels
 from src.core.events import startup_event
 from src.resources import strings
 from src.utils import utils
@@ -49,7 +47,8 @@ def get_application() -> FastAPI:
     #     "startup", lambda: asyncio.create_task(tasks.schedule_currency_update())
     # )
 
-    application.include_router(parcels_router, tags=["parcels"], prefix="/api/parcels")
+    application.include_router(parcels.router, tags=["parcels"], prefix="/api/parcels")
+    application.include_router(debug.router, tags=["debug"], prefix="/debug/events")
 
     return application
 
