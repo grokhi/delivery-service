@@ -1,18 +1,24 @@
+USE `delivery-service-db`;
+
+-- DROP TABLE IF EXISTS `delivery-service-db`.parcels; 
+-- DROP TABLE IF EXISTS `delivery-service-db`.parcel_types;
+
 CREATE TABLE parcel_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE parcels (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     weight FLOAT NOT NULL,
     type_id INT NOT NULL,
-    cost FLOAT NOT NULL,
-    shipping_cost FLOAT,
+    type VARCHAR(255) NOT NULL,
+    cost_usd FLOAT NOT NULL,
+    shipping_cost_rub FLOAT,
     FOREIGN KEY (type_id) REFERENCES parcel_types(id)
 );
 
 -- Insert initial data
-INSERT INTO parcel_types (name) VALUES ('Clothing'), ('Electronics'), ('Miscellaneous');
+INSERT INTO parcel_types (name) VALUES ('clothing'), ('electronics'), ('other');

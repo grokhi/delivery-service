@@ -1,36 +1,19 @@
 from __future__ import annotations
 
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-import os
-import json
-from redis import Redis
-import uuid
-from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from src.db.models import parcels
-import httpx
-import asyncio
-import aioredis
+from src.db.models.parcels import Parcel, ParcelType
+
 from typing import Any, Dict, TYPE_CHECKING
-import json
-
-if TYPE_CHECKING:
-    from .schemas.parcels import Parcel, ParcelType, ParcelCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 
-# SQLALCHEMY_DATABASE_URL = os.getenv(
-#     "DATABASE_URL", "mysql+mysqlconnector://root:@localhost/database"
-# )
-
-# engine = create_engine(SQLALCHEMY_DATABASE_URL)
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-# def get_db():
-#     """Gets a database session."""
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
+async def get_parcel_type(name: str, db: AsyncSession) -> ParcelType:
+    # type_record = db.query(ParcelType).filter_by(name=name).first()
+    result = await db.execute(select(ParcelType).filter_by(name=name))
+    type_record = result.scalar()
+    if not type_record:
+        raise HTTPException(
+            status_code=400, detail=f"Parcel type '{name}' not found in the database."
+        )
+    return type_record

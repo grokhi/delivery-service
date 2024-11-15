@@ -1,15 +1,8 @@
 from fastapi import APIRouter
 
 from fastapi import FastAPI, Depends, HTTPException, Request
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
-from fastapi.openapi.docs import get_swagger_ui_html
 
-# from src.redis import Redis
-from sqlalchemy.orm import Session
 from sqlalchemy import func
-import json
 from src.resources import strings
 from src.schemas.parcels import (
     ParcelCreate,
@@ -20,22 +13,18 @@ from src.schemas.parcels import (
     ParcelCreateResponse,
     ParcelTypesResponse,
 )
-from src.utils.utils import (
-    calculate_shipping_cost,
-    get_exchange_rate,
-    generate_uuid,
-    get_parcel_type,
-)
+from src.utils.utils import generate_uuid
 from src.db.base import get_db
 from src.db.models.parcels import Parcel, ParcelType
+from src.api.dependencies import get_parcel_type
 
-router = APIRouter()
 from typing import List
-
 
 from src.core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+
+router = APIRouter()
 
 
 @router.post("/create", response_model=ParcelCreateResponse, tags=["parcels"])
@@ -47,8 +36,6 @@ async def create_parcel(
     """Registers a new parcel."""
     try:
         user_id = request.cookies.get(settings.SESSION_KEY, generate_uuid())
-        # parcel_id = f"{user_id}__{generate_uuid()}"
-
         parcel_type = await get_parcel_type(parcel_entry.type, db)
 
         new_parcel = Parcel(

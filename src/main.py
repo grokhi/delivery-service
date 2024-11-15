@@ -1,23 +1,17 @@
-from fastapi import FastAPI, Depends, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
-from fastapi.openapi.docs import get_swagger_ui_html
-from contextlib import asynccontextmanager
-from src.core import cache
-from src.api.routes.parcels import router as parcels_router
-
 import asyncio
+from contextlib import asynccontextmanager
 
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse
+
+from src.api.routes.parcels import router as parcels_router
+from src.core import events
+from src.core.events import startup_event
 from src.resources import strings
 from src.utils import utils
-
-
-async def startup_event():
-    try:
-        asyncio.create_task(cache.schedule_currency_update())
-    except Exception as e:
-        print(f"Startup failed: {e}")
 
 
 @asynccontextmanager
@@ -55,7 +49,7 @@ def get_application() -> FastAPI:
     #     "startup", lambda: asyncio.create_task(tasks.schedule_currency_update())
     # )
 
-    application.include_router(parcels_router, tags=["parcels"], prefix="/parcels")
+    application.include_router(parcels_router, tags=["parcels"], prefix="/api/parcels")
 
     return application
 

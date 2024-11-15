@@ -19,7 +19,6 @@ class ParcelType(Base):
 class Parcel(Base):
     __tablename__ = "parcels"
 
-    # id = Column(String(255), primary_key=True, index=True)
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(String(255))
     name = Column(String(255))

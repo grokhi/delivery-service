@@ -1,13 +1,6 @@
-from __future__ import annotations
-
 from pydantic import BaseModel, field_validator, Field
 from typing import Optional, List, Literal, Union
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import NoResultFound
-from fastapi import HTTPException
-from src.resources import strings
-from src.db.models import parcels
-from src.db.base import get_db
+
 from src.core.config import settings
 
 
@@ -49,7 +42,6 @@ class Parcel(ParcelCreate):
     shipping_cost_rub: Optional[Union[float, str]] = None
 
     class Config:
-        # orm_mode = True
         from_attributes = True
 
 
@@ -65,7 +57,6 @@ class ParcelListResponse(BaseModel):
     parcels: List[Parcel]
 
     class Config:
-        # orm_mode = True
         from_attributes = True
 
 
@@ -79,7 +70,6 @@ class ParcelTypesResponse(BaseModel):
     name: str
 
     class Config:
-        # orm_mode = True
         from_attributes = True
 
 
@@ -90,5 +80,4 @@ class ParcelIdResponse(BaseModel):
     shipping_cost_rub: Union[float, str]
 
     class Config:
-        # orm_mode = True
         from_attributes = True
