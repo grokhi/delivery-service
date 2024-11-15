@@ -8,32 +8,18 @@ from redis import Redis
 import uuid
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from src.parcels import models
+from src.db.models.parcels import Parcel, ParcelType
+from src.schemas.parcels import ParcelCreate
 import httpx
 import asyncio
 import aioredis
 from typing import Any, Dict, TYPE_CHECKING
 import json
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
-if TYPE_CHECKING:
-    from .parcels.schemas import Parcel, ParcelType, ParcelCreate
-
-
-SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", "mysql+mysqlconnector://root:@localhost/database"
-)
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db():
-    """Gets a database session."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# if TYPE_CHECKING:
+#     from .schemas.parcels import Parcel, ParcelType, ParcelCreate
 
 
 def calculate_shipping_cost(parcel: ParcelCreate, exchange_rate: float):
@@ -59,8 +45,10 @@ def generate_uuid() -> str:
     return str(uuid.uuid4())
 
 
-def get_parcel_type(name: str, db: Session) -> models.ParcelType:
-    type_record = db.query(models.ParcelType).filter_by(name=name).first()
+async def get_parcel_type(name: str, db: AsyncSession) -> ParcelType:
+    # type_record = db.query(ParcelType).filter_by(name=name).first()
+    result = await db.execute(select(ParcelType).filter_by(name=name))
+    type_record = result.scalar()
     if not type_record:
         raise HTTPException(
             status_code=400, detail=f"Parcel type '{name}' not found in the database."

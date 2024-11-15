@@ -4,15 +4,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.openapi.docs import get_swagger_ui_html
 from contextlib import asynccontextmanager
-from src.parcels.router import router as parcels_router
+from src.core import cache
+from src.api.routes.parcels import router as parcels_router
 
-from src import strings, utils, tasks
 import asyncio
+
+from src.resources import strings
+from src.utils import utils
 
 
 async def startup_event():
     try:
-        asyncio.create_task(tasks.schedule_currency_update())
+        asyncio.create_task(cache.schedule_currency_update())
     except Exception as e:
         print(f"Startup failed: {e}")
 
@@ -27,8 +30,8 @@ def get_application() -> FastAPI:
 
     application = FastAPI(
         title="International Delivery Service",
-        docs_url="/docs",
-        openapi_url="/openapi.json",
+        # docs_url="/docs",
+        # openapi_url="/openapi.json",
         lifespan=lifespan,
     )
 

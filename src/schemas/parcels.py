@@ -5,20 +5,22 @@ from typing import Optional, List, Literal, Union
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
 from fastapi import HTTPException
-from src import strings
-from src.parcels import models
-from src.utils import get_db
+from src.resources import strings
+from src.db.models import parcels
+from src.db.base import get_db
+from src.core.config import settings
 
 
-def get_allowed_types():
-    db = next(get_db())
-    return [name[0] for name in db.query(models.ParcelType.name).all()]
+# async def get_allowed_types():
+#     # db = next(get_db())
+#     async for db in get_db():
+#         return [name[0] for name in db.query(parcels.ParcelType.name).all()]
 
 
 class ParcelCreate(BaseModel):
     name: str = Field(default="some_parcel")
     weight: float = Field(default=1.0)
-    type: str = Field(default="other")
+    type: str = Field(default=settings.PARCEL_TYPES[0])
     cost_usd: float = Field(default=1.0)
 
     @validator("weight")
@@ -29,9 +31,10 @@ class ParcelCreate(BaseModel):
 
     @validator("type")
     def category_must_be_allowed(cls, value):
-        allowed = get_allowed_types()
-        if value not in allowed:
-            raise ValueError(f"Type {value!r} is not allowed. Allowed types: {allowed}")
+        if value not in settings.PARCEL_TYPES:
+            raise ValueError(
+                f"Type {value!r} is not allowed. Allowed types: {settings.PARCEL_TYPES}"
+            )
         return value
 
     @validator("cost_usd")
@@ -55,14 +58,13 @@ class Parcel(ParcelCreate):
         )
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 class ParcelFilter(BaseModel):
-    type: Optional[str] = Field(default="other", description="Filter by specific type.")
-    shipping_cost_calculated: Optional[bool] = Field(
-        default=None, description="Filter by shipping cost availability."
-    )
+    type: Optional[str] = settings.PARCEL_TYPES[0]
+    shipping_cost_calculated: bool = True
     limit: int = 10
     offset: int = 0
 
@@ -72,20 +74,22 @@ class ParcelListResponse(BaseModel):
     parcels: List[Parcel]
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
-class ParcelResponse(BaseModel):
+class ParcelCreateResponse(BaseModel):
     message: str
     parcel_id: Optional[str] = None
 
 
-class ParcelTypeResponse(BaseModel):
+class ParcelTypesResponse(BaseModel):
     id: int
     name: str
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
 
 
 class ParcelIdResponse(BaseModel):
@@ -95,4 +99,5 @@ class ParcelIdResponse(BaseModel):
     shipping_cost_rub: Union[float, str]
 
     class Config:
-        orm_mode = True
+        # orm_mode = True
+        from_attributes = True
