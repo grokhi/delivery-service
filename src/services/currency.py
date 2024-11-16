@@ -11,7 +11,7 @@ from src.resources import strings
 
 async def fetch_currency_data(redis: Redis):
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(10.0)) as client:
             response = await client.get(settings.CURRENCY_API_URL)
             if response.status_code == 200:
                 currency_data = response.json()

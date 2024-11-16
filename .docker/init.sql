@@ -1,14 +1,14 @@
-USE `delivery-service-db`;
 
--- DROP TABLE IF EXISTS `delivery-service-db`.parcels; 
--- DROP TABLE IF EXISTS `delivery-service-db`.parcel_types;
+CREATE DATABASE IF NOT EXISTS delivery;
+USE delivery;
 
-CREATE TABLE parcel_types (
+
+CREATE TABLE IF NOT EXISTS parcel_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE parcels (
+CREATE TABLE IF NOT EXISTS parcels (
     id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -20,5 +20,4 @@ CREATE TABLE parcels (
     FOREIGN KEY (type_id) REFERENCES parcel_types(id)
 );
 
--- Insert initial data
 INSERT INTO parcel_types (name) VALUES ('clothing'), ('electronics'), ('other');
