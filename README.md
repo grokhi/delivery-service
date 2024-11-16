@@ -60,7 +60,8 @@ Tests for this project are defined in the ``tests/`` folder.
 
 <!-- Set up environment variable ``DATABASE_URL`` or set up ``database_url`` in ``src/core/settings/test.py`` -->
 
-To run the tests, simply run the ``pytest tests/parcels.py`` command:
+To make the single endpoint test, simply run the ``pytest tests/parcels/test_create_parcel.py`` command
+
 
 ## API Endpoints
 
