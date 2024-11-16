@@ -19,6 +19,8 @@ uvicorn = "^0.32.0"
 websockets = "^14.1"
 aiomysql = "^0.2.0"
 cryptography = "^43.0.3"
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
 
 
 [tool.poetry.group.dev.dependencies]

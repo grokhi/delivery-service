@@ -54,6 +54,14 @@ This project is a parcel delivery service built using FastAPI. It allows users t
 
 **Warning**: MySQL may not recognize the database (fetching `localhost` instead of `delivery`) in some cases, causing errors for SQLAlchemy ORM to fetch data from the table. Docker support is not fully stable, so running the service locally is recommended.
 
+## Run tests
+
+Tests for this project are defined in the ``tests/`` folder.
+
+<!-- Set up environment variable ``DATABASE_URL`` or set up ``database_url`` in ``src/core/settings/test.py`` -->
+
+To run the tests, simply run the ``pytest tests/parcels.py`` command:
+
 ## API Endpoints
 
 ### 1. Create a Parcel
