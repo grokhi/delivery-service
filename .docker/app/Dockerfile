@@ -1,4 +1,7 @@
 FROM python:3.10-slim
+
+RUN pip install aiomysql
+
 WORKDIR /app
 
 RUN pip install poetry
