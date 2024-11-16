@@ -15,12 +15,12 @@ services:
     image: mysql:8.0
     hostname: db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: delivery
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
       - "3306:3306"
     env_file:
-      - .env      
+      - .env
     volumes:
       - .docker/setup.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data:/var/lib/mysql
