@@ -1,6 +1,6 @@
 from typing import List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.config import settings
 
@@ -55,7 +55,7 @@ class ParcelFilter(BaseModel):
     @field_validator("type")
     @classmethod
     def category_must_be_allowed(cls, value):
-        if value not in settings.PARCEL_TYPES:
+        if value is not None and value not in settings.PARCEL_TYPES:
             raise ValueError(
                 f"Type {value!r} is not allowed. Allowed types: {settings.PARCEL_TYPES}"
             )

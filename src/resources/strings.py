@@ -20,6 +20,7 @@ ERR_CURRENCY_FETCH = "Failed to fetch currency data: {status_code}"
 ERR_CURRENCY_PARSE = "Failed to parse currency data: {error}"
 ERR_SHIPPING_CALC = "Error handling shipping cost: {error}"
 ERR_STARTUP_FAILED = "Startup failed: {error}"
+ERR_VALIDATION = "Validation error occurred."
 
 # Log messages
 LOG_PARCEL_CREATED = "Parcel registered successfully with ID={id}"

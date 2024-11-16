@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 import aioredis
 
 from src.core.config import settings

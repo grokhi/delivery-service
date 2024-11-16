@@ -1,15 +1,6 @@
-import json
 import uuid
 
-from src.db.models.parcels import Parcel, ParcelType
 from src.schemas.parcels import ParcelCreate
-import httpx
-import asyncio
-from aioredis import Redis
-from typing import Any, Dict, TYPE_CHECKING
-import json
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
 
 def calculate_shipping_cost(parcel: ParcelCreate, exchange_rate: float):

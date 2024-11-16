@@ -9,7 +9,7 @@ from sqlalchemy.future import select
 
 from src.api.dependencies import get_parcel_type
 from src.core.config import settings
-from src.core.errors import BadRequestError, NotFoundError
+from src.core.errors import NotFoundError
 from src.core.logger import logger
 from src.db.base import get_db
 from src.db.models.parcels import Parcel, ParcelType
@@ -116,9 +116,6 @@ async def get_parcels_list(
             total_count=total_count,
             parcels=parcels,
         )
-    except ValidationError as e:
-        logger.warning(f"Validation error: {e}")
-        raise HTTPException(status_code=422, detail=f"Validation error: {e.errors()}")
     except Exception as e:
         logger.error(s.ERR_PARCEL_LIST.format(error=str(e)))
         raise HTTPException(

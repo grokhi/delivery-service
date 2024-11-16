@@ -32,7 +32,17 @@ This project is a parcel delivery service built using FastAPI. It allows users t
    redis-server --daemonize yes
    ```
 
-5. Run the application in `Local debug` mode using **VSCode** to start the `uvicorn` server.
+5. Set up MySQL server:
+
+   - Install and start MySQL server.
+   - Create a user and database as needed, or use the default `root` user for simplicity.
+   - Run the `.docker/init.sql` file to set up the required database structure:
+
+     ```bash
+     mysql -u user -p < ".docker/init.sql"
+     ```
+
+6. Run the application in `Local debug` mode using **VSCode** to start the `uvicorn` server.
 
 ## How to Run in Docker
 
@@ -42,7 +52,7 @@ This project is a parcel delivery service built using FastAPI. It allows users t
    docker-compose up
    ```
 
-**Warning**: MySQL may not recognize the database in some cases, causing errors for SQLAlchemy ORM to fetch data from the table. Docker support is not fully stable, so running the service locally is recommended.
+**Warning**: MySQL may not recognize the database (fetching `localhost` instead of `delivery`) in some cases, causing errors for SQLAlchemy ORM to fetch data from the table. Docker support is not fully stable, so running the service locally is recommended.
 
 ## API Endpoints
 

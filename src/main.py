@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from starlette.responses import JSONResponse
 
@@ -24,8 +24,6 @@ def get_application() -> FastAPI:
 
     application = FastAPI(
         title="International Delivery Service",
-        # docs_url="/docs",
-        # openapi_url="/openapi.json",
         lifespan=lifespan,
     )
 
@@ -47,15 +45,16 @@ def get_application() -> FastAPI:
             )
         return response
 
-    # @application.exception_handler(ValidationError)
-    # async def validation_exception_handler(request: Request, exc: ValidationError):
-    #     return JSONResponse(
-    #         status_code=422,
-    #         content={
-    #             "detail": "Validation error occurred.",
-    #             "errors": exc.errors(),  # List of specific validation issues
-    #         },
-    #     )
+    @application.exception_handler(ValidationError)
+    async def validation_exception_handler(request: Request, exc: ValidationError):
+        errors = [
+            {"loc": error["loc"], "msg": error["msg"], "type": error["type"]}
+            for error in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            content={"detail": strings.ERR_VALIDATION, "errors": errors},
+        )
 
     application.include_router(parcels.router, tags=["parcels"], prefix="/api/parcels")
     application.include_router(debug.router, tags=["debug"], prefix="/debug/events")
