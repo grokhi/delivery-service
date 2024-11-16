@@ -42,7 +42,7 @@ This project is a parcel delivery service built using FastAPI. It allows users t
      mysql -u user -p < ".docker/init.sql"
      ```
 
-6. Run the application in `Local debug` mode using **VSCode** to start the `uvicorn` server.
+6. Run the application in `Local debug` mode using **VSCode** to start the `uvicorn` server. Dont forget to specify your connection settings in the `.env` file.
 
 ## How to Run in Docker
 
@@ -51,8 +51,6 @@ This project is a parcel delivery service built using FastAPI. It allows users t
    ```bash
    docker-compose up
    ```
-
-**Warning**: MySQL may not recognize the database (fetching `localhost` instead of `delivery`) in some cases, causing errors for SQLAlchemy ORM to fetch data from the table. Docker support is not fully stable, so running the service locally is recommended.
 
 ## Run tests
 
