@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import ValidationError
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,7 +27,18 @@ from src.utils.utils import generate_uuid
 router = APIRouter()
 
 
-@router.post("/create", response_model=ParcelCreateResponse, tags=["parcels"])
+@router.post(
+    "/create",
+    response_model=ParcelCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["parcels"],
+    description="Registers a new parcel in the system by providing its name, weight, type, and cost in USD. "
+    "The parcel will be associated with the current user if a session exists.",
+    responses={
+        201: {"description": "Parcel created successfully, returns the created parcel's ID."},
+        500: {"description": "Internal server error during parcel creation."},
+    },
+)
 async def create_parcel(
     parcel_entry: ParcelCreate,
     request: Request,
@@ -63,7 +74,16 @@ async def create_parcel(
         ) from e
 
 
-@router.get("/types", response_model=List[ParcelTypesResponse], tags=["parcels"])
+@router.get(
+    "/types",
+    response_model=List[ParcelTypesResponse],
+    tags=["parcels"],
+    description="Fetches all parcel types available in the system. These types help categorize parcels when they are created.",
+    responses={
+        200: {"description": "Successfully returns all parcel types."},
+        500: {"description": "Internal server error when fetching parcel types."},
+    },
+)
 async def get_parcel_types(
     db: AsyncSession = Depends(get_db),
 ):
@@ -79,7 +99,17 @@ async def get_parcel_types(
         ) from e
 
 
-@router.get("/list", response_model=ParcelListResponse, tags=["parcels"])
+@router.get(
+    "/list",
+    response_model=ParcelListResponse,
+    tags=["parcels"],
+    description="Retrieves a paginated list of parcels for the current user with optional filtering by parcel type "
+    "and shipping cost calculation status. Pagination is controlled via offset and limit.",
+    responses={
+        200: {"description": "Successfully returns a paginated list of parcels."},
+        500: {"description": "Internal server error when fetching parcel list."},
+    },
+)
 async def get_parcels_list(
     request: Request,
     parcel_filter: ParcelFilter = Depends(),
@@ -124,7 +154,17 @@ async def get_parcels_list(
         ) from e
 
 
-@router.get("/{parcel_id}", response_model=ParcelIdResponse, tags=["parcels"])
+@router.get(
+    "/{parcel_id}",
+    response_model=ParcelIdResponse,
+    tags=["parcels"],
+    description="Fetches detailed information for a specific parcel identified by parcel_id.",
+    responses={
+        200: {"description": "Successfully returns the parcel with the given ID."},
+        404: {"description": "Parcel not found for the given parcel ID."},
+        500: {"description": "Internal server error when fetching parcel details."},
+    },
+)
 async def get_parcel(
     parcel_id: int,
     db: AsyncSession = Depends(get_db),

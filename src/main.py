@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 def get_application() -> FastAPI:
 
     application = FastAPI(
-        title="International Delivery Service",
+        title=settings.PROJECT_NAME,
         lifespan=lifespan,
     )
 
