@@ -1,7 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-
-from sqlalchemy import Column, Integer, String, ForeignKey, Float
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
@@ -14,6 +12,7 @@ class ParcelType(Base):
     name = Column(String(255), unique=True, nullable=False)
 
     parcels = relationship("Parcel", back_populates="parcel_type")
+    shipping_aggregates = relationship("ShippingCostRubAgg", back_populates="parcel_type")
 
 
 class Parcel(Base):
@@ -35,3 +34,15 @@ class Parcel(Base):
         return (
             self.shipping_cost_rub if self.shipping_cost_rub is not None else "Not calculated yet."
         )
+
+
+class ShippingCostRubAgg(Base):
+    __tablename__ = "shipping_cost_rub_agg"
+
+    id = Column(String(255), primary_key=True)
+    timestamp = Column(DateTime)
+    type_id = Column(Integer, ForeignKey("parcel_types.id"), nullable=False)
+    type = Column(String(255), nullable=False)
+    shipping_cost_rub = Column(Float, nullable=False)
+
+    parcel_type = relationship("ParcelType", back_populates="shipping_aggregates")

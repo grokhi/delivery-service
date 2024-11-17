@@ -31,8 +31,14 @@ LOG_DEBUG_EVENT_START = "Running debug event: {event}"
 LOG_DEBUG_EVENT_COMPLETE = "Debug event '{event}' completed successfully"
 LOG_DEBUG_FETCH_CURRENCY = "Running currency fetch task"
 LOG_DEBUG_SHIPPING_COST = "Running shipping cost calculation task"
+LOG_DEBUG_SHIPPING_COSTS_AGG = "Running shipping costs aggregation in MongoDB"
+LOG_DEBUG_SHIPPING_COSTS_AGG_RESULT = "Processing aggregation result: {result}"
+LOG_DEBUG_SHIPPING_COST_BATCHES = (
+    "Batch {n_batch} processed, matched: {matched_count}, modified: {modified_count}"
+)
 LOG_CURRENCY_UPDATE = "Currency data updated"
-LOG_SHIPPING_UPDATE = "Updated {count} parcels with calculated shipping costs"
+LOG_SHIPPING_UPDATE = "Registered {count} parcels with calculated shipping costs"
+LOG_SHIPPING_AGG_UPDATE = "Registered {count} parcels shipping costs aggregated by the day of registration and parcel type"
 LOG_NO_UNREGISTERED_PARCELS = "No unregistered parcels found"
 LOG_RETRY = "Retrying in {delay} seconds..."
 

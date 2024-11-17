@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS parcel_types (
     name VARCHAR(255) NOT NULL
 );
 
+INSERT INTO parcel_types (name) VALUES ('clothing'), ('electronics'), ('other');
+
 CREATE TABLE IF NOT EXISTS parcels (
     id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
@@ -20,4 +22,13 @@ CREATE TABLE IF NOT EXISTS parcels (
     FOREIGN KEY (type_id) REFERENCES parcel_types(id)
 );
 
-INSERT INTO parcel_types (name) VALUES ('clothing'), ('electronics'), ('other');
+
+
+CREATE TABLE IF NOT EXISTS shipping_cost_rub_agg (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+	timestamp DATETIME NOT NULL,
+    type_id INT NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    shipping_cost_rub FLOAT NOT NULL,
+    FOREIGN KEY (type_id) REFERENCES parcel_types(id)
+);

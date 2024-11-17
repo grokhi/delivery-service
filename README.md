@@ -56,10 +56,7 @@ This project is a parcel delivery service built using FastAPI. It allows users t
 
 Tests for this project are defined in the ``tests/`` folder.
 
-<!-- Set up environment variable ``DATABASE_URL`` or set up ``database_url`` in ``src/core/settings/test.py`` -->
-
-To make the single endpoint test, simply run the ``pytest tests/parcels/test_create_parcel.py`` command
-
+To make the single endpoint test, simply run the ``./run_tests.sh`` script
 
 ## API Endpoints
 

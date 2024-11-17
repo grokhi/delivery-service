@@ -8,9 +8,11 @@ services:
     depends_on:
       - db
       - redis
+      - mongo
     environment:
       DATABASE_URL: mysql+aiomysql://root:${MYSQL_ROOT_PASSWORD}@db:3306/${MYSQL_DATABASE}
       REDIS_URL: redis://redis:6379
+      MONGO_URL: mongodb://mongo:27017/
 
   db:
     build: .docker/db
@@ -23,6 +25,8 @@ services:
       - "3306:3306"
     env_file:
       - .env
+    volumes: 
+      - mysql_data:/var/lib/mysql 
 
   redis:
     image: redis:6.2
@@ -30,3 +34,13 @@ services:
       - .env
     ports:
       - "6379:6379"
+
+  mongo:
+    image: mongo:8.0.3
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+
+volumes: 
+  mysql_data:
