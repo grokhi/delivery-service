@@ -21,6 +21,8 @@ ERR_CURRENCY_PARSE = "Failed to parse currency data: {error}"
 ERR_SHIPPING_CALC = "Error handling shipping cost: {error}"
 ERR_STARTUP_FAILED = "Startup failed: {error}"
 ERR_VALIDATION = "Validation error occurred."
+ERR_RETRY_ATTEMPT = "Error in {func_name}. Attempt {retries}/{max_retries}. Error: {error}"
+ERR_MAX_RETRIES = "Max retries reached for {func_name}."
 
 # Log messages
 LOG_PARCEL_CREATED = "Parcel registered successfully with ID={id}"
@@ -32,6 +34,7 @@ LOG_DEBUG_SHIPPING_COST = "Running shipping cost calculation task"
 LOG_CURRENCY_UPDATE = "Currency data updated"
 LOG_SHIPPING_UPDATE = "Updated {count} parcels with calculated shipping costs"
 LOG_NO_UNREGISTERED_PARCELS = "No unregistered parcels found"
+LOG_RETRY = "Retrying in {delay} seconds..."
 
 # Warning messages
 WARN_REDIS_NOT_FOUND = "Currency data not found in Redis"
