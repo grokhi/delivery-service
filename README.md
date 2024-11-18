@@ -36,10 +36,10 @@ This project is a parcel delivery service built using FastAPI. It allows users t
 
    - Install and start MySQL server.
    - Create a user and database as needed, or use the default `root` user for simplicity.
-   - Run the `.docker/init.sql` file to set up the required database structure:
+   - Run the `.docker/db/init.sql` file to set up the required database structure:
 
      ```bash
-     mysql -u user -p < ".docker/init.sql"
+     mysql -u user -p < ".docker/db/init.sql"
      ```
 
 6. Run the application in `Local debug` mode using **VSCode** to start the `uvicorn` server. Dont forget to specify your connection settings in the `.env` file.
