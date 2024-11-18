@@ -81,7 +81,7 @@ async def run_debug_events(event_name: str = "all"):
     Run specific tasks manually for debugging purposes.
 
     Args:
-        task_name (str): Name of the task to run ("currency", "shipping", "agg_shipping" or "all")
+        task_name (str): Name of the task to run ("currency", "shipping", "shipping_agg" or "all")
     """
 
     try:
